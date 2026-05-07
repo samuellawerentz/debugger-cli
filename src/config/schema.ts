@@ -1,1 +1,1 @@
-export type Config = { baseUrl: string; token: string }
+export type Config = { authId: string; token: string }

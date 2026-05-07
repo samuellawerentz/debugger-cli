@@ -1,14 +1,19 @@
 import type { ChatClient } from './client'
 import type { ChatEvent } from '../state/types'
 
+// TODO: replace with real Plivo debugger chat URL
+export const CHAT_URL = 'https://TODO.plivo.example/chat'
+
 export class SseClient implements ChatClient {
-  constructor(private baseUrl: string, private token: string) {}
+  constructor(private authId: string, private token: string) {}
 
   async *send(text: string, signal: AbortSignal): AsyncIterable<ChatEvent> {
-    const res = await fetch(`${this.baseUrl}/chat`, {
+    const basic = Buffer.from(`${this.authId}:${this.token}`).toString('base64')
+
+    const res = await fetch(CHAT_URL, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${this.token}`,
+        Authorization: `Basic ${basic}`,
         'Content-Type': 'application/json',
         Accept: 'text/event-stream',
       },
@@ -49,7 +54,6 @@ export class SseClient implements ChatClient {
             yield { type: 'event', payload: obj }
           }
         } catch {
-          // plain string token
           yield { type: 'token', text: raw }
         }
       }

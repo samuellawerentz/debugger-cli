@@ -2,28 +2,28 @@ import { create } from 'zustand'
 import { loadConfig, saveConfig, clearConfig } from '../config/store'
 
 type AuthState = {
-  baseUrl: string
+  authId: string
   token: string
   hydrated: boolean
   hydrate: () => void
-  login: (creds: { baseUrl: string; token: string }) => void
+  login: (creds: { authId: string; token: string }) => void
   logout: () => void
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  baseUrl: '',
+  authId: '',
   token: '',
   hydrated: false,
   hydrate() {
     const cfg = loadConfig()
-    set({ baseUrl: cfg?.baseUrl ?? '', token: cfg?.token ?? '', hydrated: true })
+    set({ authId: cfg?.authId ?? '', token: cfg?.token ?? '', hydrated: true })
   },
-  login({ baseUrl, token }) {
-    saveConfig({ baseUrl, token })
-    set({ baseUrl, token })
+  login({ authId, token }) {
+    saveConfig({ authId, token })
+    set({ authId, token })
   },
   logout() {
     clearConfig()
-    set({ baseUrl: '', token: '' })
+    set({ authId: '', token: '' })
   },
 }))

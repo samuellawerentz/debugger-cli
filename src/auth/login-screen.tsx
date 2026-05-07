@@ -3,46 +3,50 @@ import { useKeyboard } from '@opentui/react'
 import { useAuthStore } from '../state/auth-store'
 
 export function LoginScreen() {
-  const [baseUrl, setBaseUrl] = useState('')
+  const [authId, setAuthId] = useState('')
   const [token, setToken] = useState('')
-  const [focused, setFocused] = useState<'baseUrl' | 'token'>('baseUrl')
+  const [focused, setFocused] = useState<'authId' | 'token'>('authId')
   const login = useAuthStore((s) => s.login)
 
   useKeyboard((key) => {
     if (key.name === 'tab') {
-      setFocused((prev) => (prev === 'baseUrl' ? 'token' : 'baseUrl'))
+      setFocused((prev) => (prev === 'authId' ? 'token' : 'authId'))
     }
   })
 
   const handleSubmit = useCallback(() => {
-    if (baseUrl.trim() && token.trim()) {
-      login({ baseUrl: baseUrl.trim(), token: token.trim() })
+    if (authId.trim() && token.trim()) {
+      login({ authId: authId.trim(), token: token.trim() })
     }
-  }, [baseUrl, token, login])
+  }, [authId, token, login])
 
   return (
-    <box style={{ border: true, padding: 2, flexDirection: 'column', gap: 1 }}>
-      <text fg="#FFFF00">Plivo Debugger — Login</text>
+    <box style={{ flexDirection: 'column', alignItems: 'center', gap: 1, padding: 2 }}>
+      <ascii-font text="PLIVO" font="block" color="#5C6BC0" />
 
-      <box title="Base URL" style={{ border: true, width: 60, height: 3 }}>
-        <input
-          placeholder="https://api.example.com"
-          onInput={setBaseUrl}
-          onSubmit={() => setFocused('token')}
-          focused={focused === 'baseUrl'}
-        />
+      <box style={{ border: true, padding: 2, flexDirection: 'column', gap: 1 }}>
+        <text fg="#FFFF00">Debugger — Login</text>
+
+        <box title="Auth ID" style={{ border: true, width: 60, height: 3 }}>
+          <input
+            placeholder="Plivo Auth ID"
+            onInput={setAuthId}
+            onSubmit={() => setFocused('token')}
+            focused={focused === 'authId'}
+          />
+        </box>
+
+        <box title="Auth Token" style={{ border: true, width: 60, height: 3 }}>
+          <input
+            placeholder="Plivo Auth Token"
+            onInput={setToken}
+            onSubmit={handleSubmit}
+            focused={focused === 'token'}
+          />
+        </box>
+
+        <text fg="#888">Tab to switch fields. Enter on Token to login.</text>
       </box>
-
-      <box title="Token" style={{ border: true, width: 60, height: 3 }}>
-        <input
-          placeholder="Bearer token..."
-          onInput={setToken}
-          onSubmit={handleSubmit}
-          focused={focused === 'token'}
-        />
-      </box>
-
-      <text fg="#888">Tab to switch fields. Enter on Token to login.</text>
     </box>
   )
 }
