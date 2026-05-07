@@ -1,0 +1,23 @@
+{
+  "name": "debugger-cli",
+  "main": "src/index.tsx",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "bun run src/index.tsx",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/react": "^19.2.14"
+  },
+  "peerDependencies": {
+    "typescript": "^6.0.3"
+  },
+  "dependencies": {
+    "@opentui/core": "^0.2.4",
+    "@opentui/react": "^0.2.4",
+    "react": "^19.2.6",
+    "zustand": "^5.0.13"
+  }
+}
