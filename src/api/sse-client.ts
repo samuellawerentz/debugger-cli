@@ -1,8 +1,7 @@
 import type { ChatClient } from './client'
 import type { ChatEvent } from '../state/types'
 
-// TODO: replace with real Plivo debugger chat URL
-export const CHAT_URL = 'https://TODO.plivo.example/chat'
+export const CHAT_URL = 'http://localhost:5010/v1/aiassist/buddy-ext/chat/stream'
 
 export class SseClient implements ChatClient {
   constructor(private authId: string, private token: string) {}
@@ -40,21 +39,27 @@ export class SseClient implements ChatClient {
         if (!line.startsWith('data: ')) continue
         const raw = line.slice(6).trim()
         if (!raw) continue
+        let obj: { type?: string; data?: Record<string, unknown> }
         try {
-          const obj = JSON.parse(raw)
-          if (obj.type === 'token') {
-            yield { type: 'token', text: obj.text ?? '' }
-          } else if (obj.type === 'done') {
-            yield { type: 'done' }
-            return
-          } else if (obj.type === 'error') {
-            yield { type: 'error', message: obj.message ?? 'unknown error' }
-            return
-          } else {
-            yield { type: 'event', payload: obj }
-          }
+          obj = JSON.parse(raw)
         } catch {
           yield { type: 'token', text: raw }
+          continue
+        }
+        switch (obj.type) {
+          case 'token':
+            yield { type: 'token', text: String(obj.data?.text ?? '') }
+            break
+          case 'final':
+            yield { type: 'done' }
+            return
+          case 'error':
+            yield { type: 'error', message: String(obj.data?.message ?? 'stream error') }
+            return
+          case 'start':
+            break
+          default:
+            yield { type: 'event', payload: obj }
         }
       }
     }
