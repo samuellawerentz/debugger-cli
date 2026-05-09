@@ -1,10 +1,11 @@
 import { createCliRenderer } from '@opentui/core'
 import { createRoot } from '@opentui/react'
+import './ui/tree-sitter-setup'
+import { SseClient } from './api/sse-client'
+import { StubClient } from './api/stub-client'
 import { App } from './app'
 import { useAuthStore } from './state/auth-store'
 import { setClient } from './state/chat-store'
-import { SseClient } from './api/sse-client'
-import { StubClient } from './api/stub-client'
 
 useAuthStore.subscribe((s, prev) => {
   if (s.authId !== prev.authId || s.token !== prev.token) {

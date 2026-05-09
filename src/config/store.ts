@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, mkdirSync, chmodSync } from 'node:fs'
+import { chmodSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import type { Config } from './schema'
@@ -10,7 +10,7 @@ export function loadConfig(): Config | null {
   try {
     const raw = readFileSync(configPath, 'utf-8')
     const parsed = JSON.parse(raw)
-    if (typeof parsed.baseUrl === 'string' && typeof parsed.token === 'string') {
+    if (typeof parsed.authId === 'string' && typeof parsed.token === 'string') {
       return parsed as Config
     }
     return null

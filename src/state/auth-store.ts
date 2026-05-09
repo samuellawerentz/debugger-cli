@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { loadConfig, saveConfig, clearConfig } from '../config/store'
+import { clearConfig, loadConfig, saveConfig } from '../config/store'
 
 type AuthState = {
   authId: string

@@ -1,16 +1,21 @@
 import { appendFileSync } from 'node:fs'
-import type { ChatClient } from './client'
 import type { ChatEvent } from '../state/types'
+import type { ChatClient } from './client'
 
 export const CHAT_URL = 'http://127.0.0.1:5010/v1/aiassist/buddy-ext/chat'
 const LOG_PATH = '/tmp/debugger-cli.log'
 
 const log = (msg: string) => {
-  try { appendFileSync(LOG_PATH, `[${new Date().toISOString()}] ${msg}\n`) } catch {}
+  try {
+    appendFileSync(LOG_PATH, `[${new Date().toISOString()}] ${msg}\n`)
+  } catch {}
 }
 
 export class SseClient implements ChatClient {
-  constructor(private authId: string, private token: string) {}
+  constructor(
+    private authId: string,
+    private token: string,
+  ) {}
 
   async *send(text: string, signal: AbortSignal): AsyncIterable<ChatEvent> {
     const basic = Buffer.from(`${this.authId}:${this.token}`).toString('base64')
@@ -40,7 +45,10 @@ export class SseClient implements ChatClient {
     if (!res.ok || !res.body) {
       const body = await res.text().catch(() => '')
       log(`error body: ${body.slice(0, 500)}`)
-      yield { type: 'error', message: `HTTP ${res.status}: ${body.slice(0, 200) || res.statusText}` }
+      yield {
+        type: 'error',
+        message: `HTTP ${res.status}: ${body.slice(0, 200) || res.statusText}`,
+      }
       return
     }
 

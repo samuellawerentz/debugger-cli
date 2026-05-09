@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
-import { useAuthStore } from './state/auth-store'
 import { LoginScreen } from './auth/login-screen'
 import { ChatScreen } from './chat/chat-screen'
+import { useAuthStore } from './state/auth-store'
 import { useAppKeymap } from './ui/keymap'
 
 export function App() {
@@ -9,7 +9,9 @@ export function App() {
   const hydrated = useAuthStore((s) => s.hydrated)
   const hydrate = useAuthStore((s) => s.hydrate)
 
-  useEffect(() => { hydrate() }, [])
+  useEffect(() => {
+    hydrate()
+  }, [hydrate])
   useAppKeymap()
 
   if (!hydrated) return <text>Loading...</text>

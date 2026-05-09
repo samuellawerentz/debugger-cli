@@ -1,6 +1,7 @@
-import { MessageList } from './message-list'
-import { Composer } from './composer'
+import { Palette } from '../ui/palette'
 import { StatusBar } from '../ui/status-bar'
+import { Composer } from './composer'
+import { MessageList } from './message-list'
 
 export function ChatScreen() {
   return (
@@ -8,6 +9,7 @@ export function ChatScreen() {
       <MessageList />
       <Composer />
       <StatusBar />
+      <Palette />
     </box>
   )
 }
