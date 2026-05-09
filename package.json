@@ -6,6 +6,7 @@
   "scripts": {
     "start": "bun --watch run src/index.tsx",
     "typecheck": "tsc --noEmit",
+    "test": "bun test",
     "lint": "biome check src",
     "lint:fix": "biome check --write src",
     "format": "biome format --write src"

@@ -3,25 +3,57 @@ import { isObject, isString, truncate as ldTruncate, map } from 'lodash'
 import type { Token } from 'marked'
 import type { Message as MessageType } from '../state/types'
 import { syntaxStyle } from '../ui/syntax-style'
+import { PALETTE } from '../ui/tokens'
 
-const renderCodeBlock = (token: Token, ctx: RenderNodeContext) => {
-  if (token.type !== 'code') return undefined
-  if (!('text' in token) || !token.text?.trim()) return null
-  const inner = ctx.defaultRender()
-  if (!inner) return undefined
-  const wrapper = new BoxRenderable(inner.ctx, {
-    border: ['left'],
-    borderColor: '#A78BFA',
-    backgroundColor: '#161b22',
-    paddingLeft: 2,
-    paddingRight: 1,
-    marginTop: 1,
-    marginBottom: 1,
-    width: '100%',
-    flexDirection: 'column',
-  })
-  wrapper.add(inner)
-  return wrapper
+const renderBlock = (token: Token, ctx: RenderNodeContext) => {
+  if (token.type === 'code') {
+    if (!('text' in token) || !token.text?.trim()) return null
+    const inner = ctx.defaultRender()
+    if (!inner) return undefined
+    const wrapper = new BoxRenderable(inner.ctx, {
+      border: ['left'],
+      borderColor: PALETTE.accentPurple,
+      backgroundColor: PALETTE.surfaceElevated,
+      paddingLeft: 2,
+      paddingRight: 1,
+      marginTop: 1,
+      marginBottom: 1,
+      width: '100%',
+      flexDirection: 'column',
+    })
+    wrapper.add(inner)
+    return wrapper
+  }
+
+  if (token.type === 'blockquote') {
+    const inner = ctx.defaultRender()
+    if (!inner) return undefined
+    const wrapper = new BoxRenderable(inner.ctx, {
+      border: ['left'],
+      borderColor: PALETTE.borderWeak,
+      paddingLeft: 1,
+      marginTop: 1,
+      marginBottom: 1,
+      width: '100%',
+      flexDirection: 'column',
+    })
+    wrapper.add(inner)
+    return wrapper
+  }
+
+  if (token.type === 'heading') {
+    const inner = ctx.defaultRender()
+    if (!inner) return undefined
+    const wrapper = new BoxRenderable(inner.ctx, {
+      marginTop: 1,
+      marginBottom: 1,
+      flexDirection: 'column',
+    })
+    wrapper.add(inner)
+    return wrapper
+  }
+
+  return undefined
 }
 
 type Props = { message: MessageType; isStreaming?: boolean }
@@ -32,14 +64,14 @@ export function Message({ message, isStreaming }: Props) {
       <box
         style={{
           flexDirection: 'row',
-          backgroundColor: '#1c2128',
+          backgroundColor: PALETTE.surfaceHighlight,
           paddingLeft: 1,
           paddingRight: 1,
           marginTop: 1,
         }}
       >
-        <text fg="#58A6FF">{'> '}</text>
-        <text fg="#E6EDF3">{message.content}</text>
+        <text fg={PALETTE.accent}>{'> '}</text>
+        <text fg={PALETTE.textStrong}>{message.content}</text>
       </box>
     )
   }
@@ -47,7 +79,7 @@ export function Message({ message, isStreaming }: Props) {
   if (message.role === 'system') {
     return (
       <box style={{ flexDirection: 'row', paddingLeft: 1, marginTop: 1 }}>
-        <text fg="#6e7681">⋯ {message.content}</text>
+        <text fg={PALETTE.textDim}>⋯ {message.content}</text>
       </box>
     )
   }
@@ -55,19 +87,19 @@ export function Message({ message, isStreaming }: Props) {
   if (message.role === 'tool_call') {
     return (
       <box style={{ flexDirection: 'row', paddingLeft: 1, marginTop: 1 }}>
-        <text fg="#FFA657">● </text>
-        <text fg="#D2A8FF" attributes={TextAttributes.BOLD}>
+        <text fg={PALETTE.toolBullet}>● </text>
+        <text fg={PALETTE.toolName} attributes={TextAttributes.BOLD}>
           {message.name}
         </text>
-        <text fg="#8B949E">({summarizeArgs(message.args)})</text>
+        <text fg={PALETTE.textWeak}>({summarizeArgs(message.args)})</text>
       </box>
     )
   }
 
   if (message.role === 'tool_result') {
-    const accent = message.ok ? '#3FB950' : '#F85149'
+    const accent = message.ok ? PALETTE.ok : PALETTE.err
     return (
-      <box style={{ flexDirection: 'row', paddingLeft: 3, marginTop: 0 }}>
+      <box style={{ flexDirection: 'row', paddingLeft: 3 }}>
         <text fg={accent}>{message.ok ? '└ ' : '└ ✗ '}</text>
         <code
           content={truncate(message.output, 800)}
@@ -85,7 +117,7 @@ export function Message({ message, isStreaming }: Props) {
         syntaxStyle={syntaxStyle}
         streaming={!!isStreaming}
         conceal
-        renderNode={renderCodeBlock}
+        renderNode={renderBlock}
       />
     </box>
   )
