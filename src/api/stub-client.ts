@@ -1,8 +1,9 @@
+import { v4 as uuid } from 'uuid'
 import type { ChatEvent } from '../state/types'
 import type { ChatClient } from './client'
 
 export class StubClient implements ChatClient {
-  async *send(text: string, signal: AbortSignal): AsyncIterable<ChatEvent> {
+  async *send(text: string, signal: AbortSignal, _history: unknown): AsyncIterable<ChatEvent> {
     const intro = `Looking into "${text}". Let me check the session state.`
     for (const word of intro.split(' ')) {
       if (signal.aborted) return
@@ -11,7 +12,7 @@ export class StubClient implements ChatClient {
     }
     yield { type: 'token', text: '\n\n' }
 
-    const callId = crypto.randomUUID()
+    const callId = uuid()
     yield {
       type: 'tool_call',
       id: callId,

@@ -6,6 +6,7 @@ import { syntaxStyle } from '../ui/syntax-style'
 
 const renderCodeBlock = (token: Token, ctx: RenderNodeContext) => {
   if (token.type !== 'code') return undefined
+  if (!('text' in token) || !token.text?.trim()) return null
   const inner = ctx.defaultRender()
   if (!inner) return undefined
   const wrapper = new BoxRenderable(inner.ctx, {
@@ -14,8 +15,6 @@ const renderCodeBlock = (token: Token, ctx: RenderNodeContext) => {
     backgroundColor: '#161b22',
     paddingLeft: 2,
     paddingRight: 1,
-    paddingTop: 1,
-    paddingBottom: 1,
     marginTop: 1,
     marginBottom: 1,
     width: '100%',

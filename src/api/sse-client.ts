@@ -1,6 +1,7 @@
 import { appendFileSync } from 'node:fs'
+import { v4 as uuid } from 'uuid'
 import type { ChatEvent } from '../state/types'
-import type { ChatClient } from './client'
+import type { ChatClient, HistoryTurn } from './client'
 
 export const CHAT_URL = 'http://127.0.0.1:5010/v1/aiassist/buddy-ext/chat'
 const LOG_PATH = '/tmp/debugger-cli.log'
@@ -17,9 +18,11 @@ export class SseClient implements ChatClient {
     private token: string,
   ) {}
 
-  async *send(text: string, signal: AbortSignal): AsyncIterable<ChatEvent> {
+  async *send(text: string, signal: AbortSignal, history: HistoryTurn[]): AsyncIterable<ChatEvent> {
     const basic = Buffer.from(`${this.authId}:${this.token}`).toString('base64')
-    log(`POST ${CHAT_URL} authId=${this.authId} body=${JSON.stringify({ message: text })}`)
+    log(
+      `POST ${CHAT_URL} authId=${this.authId} historyTurns=${history.length} message=${text.slice(0, 80)}`,
+    )
 
     let res: Response
     try {
@@ -30,7 +33,7 @@ export class SseClient implements ChatClient {
           'Content-Type': 'application/json',
           Accept: 'text/event-stream',
         },
-        body: JSON.stringify({ message: text, history: [] }),
+        body: JSON.stringify({ message: text, history }),
         signal,
       })
     } catch (err) {
@@ -55,6 +58,7 @@ export class SseClient implements ChatClient {
     const reader = res.body.getReader()
     const decoder = new TextDecoder()
     let buf = ''
+    const callIdsByName = new Map<string, string>()
 
     while (true) {
       const { done, value } = await reader.read()
@@ -86,6 +90,25 @@ export class SseClient implements ChatClient {
           case 'error':
             yield { type: 'error', message: String(obj.data?.message ?? 'stream error') }
             return
+          case 'tool_call': {
+            const name = String(obj.data?.name ?? 'tool')
+            const id = uuid()
+            callIdsByName.set(name, id)
+            yield { type: 'tool_call', id, name, args: obj.data?.args ?? {} }
+            break
+          }
+          case 'tool_output': {
+            const name = String(obj.data?.name ?? 'tool')
+            const callId = callIdsByName.get(name) ?? uuid()
+            const data = obj.data ?? {}
+            const ok = data.success !== false && !data.error
+            const output =
+              typeof data.preview === 'string' && data.preview
+                ? data.preview
+                : JSON.stringify(data, null, 2)
+            yield { type: 'tool_result', callId, ok, output, outputLang: 'json' }
+            break
+          }
           case 'start':
             break
           default:

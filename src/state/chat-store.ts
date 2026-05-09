@@ -1,3 +1,4 @@
+import { v4 as uuid } from 'uuid'
 import { create } from 'zustand'
 import type { ChatClient } from '../api/client'
 import { StubClient } from '../api/stub-client'
@@ -26,8 +27,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
   abort: undefined,
 
   async send(text: string) {
+    const history = get().messages.flatMap((m) =>
+      (m.role === 'user' || m.role === 'assistant') && m.content.trim().length > 0
+        ? [{ role: m.role, text: m.content }]
+        : [],
+    )
+
     const userMsg: Message = {
-      id: crypto.randomUUID(),
+      id: uuid(),
       role: 'user',
       content: text,
       ts: Date.now(),
@@ -48,7 +55,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     const ensureAssistant = (): string => {
       if (assistantId) return assistantId
       const msg: ChatMessage = {
-        id: crypto.randomUUID(),
+        id: uuid(),
         role: 'assistant',
         content: '',
         ts: Date.now(),
@@ -59,7 +66,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
 
     try {
-      for await (const event of getClient().send(text, ctrl.signal)) {
+      for await (const event of getClient().send(text, ctrl.signal, history)) {
         const e = event as ChatEvent
         if (e.type === 'token') {
           const id = ensureAssistant()
@@ -74,7 +81,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         } else if (e.type === 'tool_result') {
           assistantId = undefined
           appendMessage({
-            id: crypto.randomUUID(),
+            id: uuid(),
             role: 'tool_result',
             callId: e.callId,
             ok: e.ok,
