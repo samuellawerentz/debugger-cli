@@ -3,7 +3,7 @@ import { v4 as uuid } from 'uuid'
 import type { ChatEvent } from '../state/types'
 import type { ChatClient, HistoryTurn } from './client'
 
-export const CHAT_URL = 'http://127.0.0.1:5010/v1/aiassist/buddy-ext/chat'
+export const CHAT_URL = 'https://dev-global-auth-api.contactodev.com/v1/aiassist/buddy-ext/chat'
 const LOG_PATH = '/tmp/debugger-cli.log'
 
 const log = (msg: string) => {

@@ -29,6 +29,7 @@ export function MessageList() {
       stickyScroll
       stickyStart="bottom"
       style={{ flexGrow: 1, flexDirection: 'column', paddingLeft: 1, paddingRight: 1 }}
+      verticalScrollbarOptions={{ visible: false }}
     >
       {messages.map((m) => (
         <Message
