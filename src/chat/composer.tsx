@@ -16,7 +16,7 @@ export function Composer() {
   }
 
   return (
-    <box title="Message" style={{ border: true, height: 3 }}>
+    <box title="Message" style={{ border: true, height: 5, paddingTop: 1, paddingBottom: 1, paddingLeft: 1, paddingRight: 1, marginTop: 1 }}>
       <input
         placeholder="Type a message and press Enter... (Ctrl+P for menu)"
         value={value}
